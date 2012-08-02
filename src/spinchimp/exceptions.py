@@ -2,7 +2,7 @@
 
 
 class SpinChimpError(Exception):
-    """Base class for exceptions in Spinner Chief module."""
+    """Base class for exceptions in Spin Chimp module."""
     def __init__(self, api_error_msg):
         #api_error_msg respresents raw error string as returned by API server
         super(SpinChimpError, self).__init__()
@@ -15,12 +15,6 @@ class SpinChimpError(Exception):
             return self.api_errors[0]
         else:
             return "Multiple errors, see api_erros attribute for details."
-
-
-class LoginError(SpinChimpError):
-    """Raised if there are login errors."""
-    def __str__(self):
-        return self.api_error_msg
 
 
 class WrongParameterName(SpinChimpError):
