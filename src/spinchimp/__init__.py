@@ -15,15 +15,6 @@ class SpinChimp(object):
 
     TIMEOUT = 10
 
-    DEFAULT_PARAMS_CALC = {
-        'minlength': '3',
-    }
-
-    DEFAULT_PARAMS_GEN = {
-        'dontincludeoriginal': '0',
-        'reorderparagraphs': '0',
-    }
-
     DEFAULT_PARAMS_SPIN = {
         'quality': '4',
         'posmatch': '3',
@@ -45,7 +36,7 @@ class SpinChimp(object):
         self._apikey = apikey
         self._aid = aid
 
-    def _get_param_value(self, param_name, params, def_params):
+    def _get_param_value(self, param_name, params, def_params={}):
         """ Returns parameter value or use default.
         """
         if param_name in params:
@@ -75,74 +66,104 @@ class SpinChimp(object):
         except ValueError:
             raise ex.WrongParameterVal(param, val)
 
-    # TODO
     def _validate(self, params):
         """ Checks every single parameter and
         raise error on wrong key or value.
         """
+
         # remove entries with None value
         for i, j in params.iteritems():
             if j is None:
                 del(i)
 
-        self._value_has('protecthtml', ['0', '1'], params)
+        self._value_has('quality', ['1', '2', '3', '4', '5'], params)
 
-        self._value_has('usehurricane', ['0', '1'], params)
+        self._value_has('posmatch', ['0', '1', '2', '3', '4'], params)
 
-        self._value_has('spinhtml', ['0', '1'], params)
+        self._value_has('rewrite', ['0', '1'], params)
 
-        self._value_has('percent', map(lambda x: str(x), range(0, 101)), params)
+        self._value_has('phraseignorequality', ['0', '1'], params)
 
-        self._value_has('phrasecount', ['2', '3', '4', 'X'], params)
+        self._value_has('spinwithinspin', ['0', '1'], params)
 
-        self._value_has('Chartype', ['1', '2', '3'], params)
+        self._value_has('spinwithinhtml', ['0', '1'], params)
 
-        self._value_has('replacetype', map(lambda x: str(x), range(0, 6)), params)
+        self._value_has('applyinstantunique', ['0', '1'], params)
 
-        self._value_has('autospin', ['0', '1'], params)
+        self._value_has('fullcharset', ['0', '1'], params)
 
-        self._value_has('convertbase', ['0', '1'], params)
+        self._value_has('spintidy', ['0', '1'], params)
 
-        self._value_has('pos', ['0', '1'], params)
-
-        self._value_has('Orderly', ['0', '1'], params)
-
-        self._value_is_int('Wordscount', params)
-
-        self._value_is_int('spinfreq', params)
-
-        # allow any combination of '[]','()','<-->'
-        val = self._get_param_value('tagprotect', params)
-        if Set(val.split(',')).difference(Set(['[]', '()', '<-->'])):
-            raise ex.WrongParameterVal('tagprotect', val)
-
-        self._value_has('spintype', ['0', '1'], params)
-
-        self._value_has('UseGrammarAI', ['0', '1'], params)
-
-        self._value_has('onecharforword', ['0', '1'], params)
-
-        self._value_has('wordquality', ['0', '1', '2', '3', '9'], params)
-
-        self._value_has('original', ['0', '1'], params)
+        self._value_has('maxspindepth', ['0', '1'], params)
 
         return True
 
-    def test_connection(self):
-        """ The server returns 'OK' on successful connection.
+    def unspun(self, text, dontincludeoriginal=0, reorderparagraphs=0):
+        """ Generates an unspun doc from one with spintax.
+        Optionally reorders paragraphs and removes original word.
+
+        :param text: text in spintax format
+        :type text: string
+        :param dontincludeoriginal: 0 (False) or 1 (True)
+        :type dontincludeoriginal: integer
+        :param reorderparagraphs: 0 (False) or 1 (True)
+        :type reorderparagraphs: integer
+
+        :return: unique text
+        :rtype: dictionary
         """
-        urldata = self.URL.format(method='TestConnection')
+
+        params = {
+            'dontincludeoriginal': str(dontincludeoriginal),
+            'reorderparagraphs': str(reorderparagraphs)
+        }
+
+        self._value_has('dontincludeoriginal', ['0', '1'], params)
+        self._value_has('reorderparagraphs', ['0', '1'], params)
+
+        response = self._send_request(
+            method='GenerateSpin',
+            text=text,
+            params=params
+        )
+        return response
+
+    def word_density(self, text, minlength=3):
+        """ Calculates the word densities of words and phrases in the article.
+
+        :param text: original text
+        :type text: string
+        :param minlength: minimum length
+        :type minlength: integer
+
+        :return: words as keys in dictionary and percents as values
+        :rtype: dictionary
+        """
+
+        params = {'minlength': str(minlength)}
+
+        self._value_is_int('minlength', params)
+
+        response = self._send_request(
+            method='CalcWordDensity',
+            text=text,
+            params=params
+        )
+        return dict([atr.split(',') for atr in response.split('|')])
+
+    @staticmethod
+    def test_connection():
+        """ Static method that checks server status.
+        The server returns 'OK' on successful connection.
+        """
+        urldata = SpinChimp.URL.format(method='TestConnection')
         req = urllib2.Request(urldata, data='')
         try:
-            response = urllib2.urlopen(req, timeout=self.TIMEOUT)
+            response = urllib2.urlopen(req, timeout=SpinChimp.TIMEOUT)
         except urllib2.URLError as e:
             raise ex.NetworkError(str(e))
 
-        result = response.read()
-
-        if result.lower().startswith('failed:'):
-            self._raise_error(result[8:])
-        return result
+        return response.read()
 
     def quota_all(self):
         """ The server returns:
@@ -165,7 +186,6 @@ class SpinChimp(object):
             params={'simple': '1'}
         )
 
-    # TODO
     def text_with_spintax(self, text, params=None):
         """ Return processed spun text with spintax.
 
@@ -178,16 +198,19 @@ class SpinChimp(object):
         :rtype: string
         """
 
-        if params is None:
-            params = self.DEFAULT_PARAMS
+        if not params:
+            params = self.DEFAULT_PARAMS_SPIN.copy()
         else:
             self._validate(params)
 
-        params['spintype'] = '0'
+        params['rewrite'] = '0'
 
-        return self._send_request(text=text, params=params)
+        return self._send_request(
+            method='GlobalSpin',
+            text=text,
+            params=params
+        )
 
-    # TODO
     def unique_variation(self, text, params=None):
         """ Return a unique variation of the given text.
 
@@ -200,14 +223,18 @@ class SpinChimp(object):
         :rtype: string
         """
 
-        if params is None:
-            params = self.DEFAULT_PARAMS
+        if not params:
+            params = self.DEFAULT_PARAMS_SPIN.copy()
         else:
             self._validate(params)
 
-        params['spintype'] = '1'
+        params['rewrite'] = '1'
 
-        return self._send_request(text=text, params=params)
+        return self._send_request(
+            method='GlobalSpin',
+            text=text,
+            params=params
+        )
 
     def _send_request(self, method, text, params):
         """ Invoke Spin Chimp API with given parameters and return its response.
@@ -242,10 +269,4 @@ class SpinChimp(object):
         return result
 
     def _raise_error(self, api_response):
-        lower = api_response.lower()
-        error = None
-
-        if lower.startswith("login error"): # TODO
-            error = ex.LoginError(api_response)
-
-        raise error if error else ex.SpinChimpError(api_response)
+        raise ex.SpinChimpError(api_response)
