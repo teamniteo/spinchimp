@@ -247,7 +247,7 @@ class SpinChimp(object):
         :rtype: string
         """
 
-        for k,v in params.items():
+        for k, v in params.items():
             params[k] = v.encode("utf-8")
 
         params['email'] = self._email
