@@ -9,8 +9,9 @@ from spinchimp import exceptions as ex
 class SpinChimp(object):
     """A class representing the Spin Chimp API
     (http://spinchimp.com/api).
+    All articles must bi in UTF-8 encoding!
     """
-    URL = u'http://api.spinchimp.com/{method}?'
+    URL = 'http://api.spinchimp.com/{method}?'
     """URL for invoking the API"""
 
     TIMEOUT = 10
@@ -247,21 +248,21 @@ class SpinChimp(object):
         """
 
         for k,v in params.items():
-            params[k] = v.encode("UTF8")
+            params[k] = v.encode("utf-8")
 
         params['email'] = self._email
         params['apikey'] = self._apikey
         params['aid'] = self._aid
 
-        urldata = self.URL.format(method=method) + urllib.urlencode(params)
-        textdata = text.encode("UTF8")
-        req = urllib2.Request(urldata, data=textdata)
+        url = self.URL.format(method=method) + urllib.urlencode(params)
+        textdata = text.encode('utf-8')
+
         try:
-            response = urllib2.urlopen(req, timeout=self.TIMEOUT)
+            response = urllib2.urlopen(url, data=textdata, timeout=self.TIMEOUT)
         except urllib2.URLError as e:
             raise ex.NetworkError(str(e))
 
-        result = response.read()
+        result = response.read().decode("utf-8")
 
         if result.lower().startswith('failed:'):
             self._raise_error(result[8:])
