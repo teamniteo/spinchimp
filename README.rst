@@ -6,7 +6,7 @@ Python bindings for SpinChimp API.
 service for spinning text (synonym substitution) that creates unique version(s)
 of existing text. This package provides a way to easily interact with
 `SpinChimp API <http://spinchimp.com/api>`_.
-Usage requires an API subscription, `get it at <http://spinchimp.com/api>`_.
+Usage requires an API subscription, `get it here <http://spinchimp.com/api>`_.
 
 * `Source code @ GitHub <https://github.com/niteoweb/spinchimp>`_
 
