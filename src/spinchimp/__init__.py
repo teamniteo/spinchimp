@@ -9,7 +9,7 @@ from spinchimp import exceptions as ex
 class SpinChimp(object):
     """A class representing the Spin Chimp API
     (http://spinchimp.com/api).
-    All articles must bi in UTF-8 encoding!
+    All articles must be in UTF-8 encoding!
     """
     URL = 'http://api.spinchimp.com/{method}?'
     """URL for invoking the API"""
