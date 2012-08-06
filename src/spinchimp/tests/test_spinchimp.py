@@ -40,7 +40,7 @@ class TestApi(unittest.TestCase):
     @mock.patch('spinchimp.urllib2')
     def test_text_with_spintax_default_call(self, urllib2):
         """Test call of text_with_spintax_call() with default values."""
-        # mock response from SpinnerChief
+        # mock response from SpinChimp
         mocked_response = 'My cat is über {cold|cool}.'
         urllib2.urlopen.return_value.read.return_value = mocked_response
 
