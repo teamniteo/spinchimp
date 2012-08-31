@@ -37,7 +37,7 @@ class SpinChimp(object):
         self._apikey = apikey
         self._aid = aid
 
-    def _get_param_value(self, param_name, params, def_params={}):
+    def _get_param_value(self, param_name, params, def_params=DEFAULT_PARAMS_SPIN):
         """ Returns parameter value or use default.
         """
         if param_name in params:
