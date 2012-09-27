@@ -2,7 +2,7 @@
 API
 ===
 
-SpinShimp
+SpinChimp
 =========
 
 .. autoclass:: spinchimp.SpinChimp

@@ -56,3 +56,4 @@ Usage
 
     >>> sc.unique_variation(text="My name is Ovca!")
     "Im Ovca!"
+
