@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from spinchimp import SpinChimp
+from spinchimp import exceptions as ex
 
 import unittest2 as unittest
 import mock
@@ -49,3 +50,46 @@ class TestApi(unittest.TestCase):
             self.sc.text_with_spintax(u'My cat is über cool.'),
             u'My cat is über {cold|cool}.',
         )
+
+    @mock.patch('spinchimp.urllib2')
+    def test_errors(self, urllib2):
+        mocked_response = 'failed:Credentials check result:InvalidEmail'
+        urllib2.urlopen.return_value.read.return_value = mocked_response
+        with self.assertRaises(ex.AuthenticationError):
+            self.sc._send_request(
+                'METHOD',
+                'Test text.',
+                SpinChimp.DEFAULT_PARAMS_SPIN
+            )
+        mocked_response = 'failed:Credentials check result:MaxQueriesReached'
+        urllib2.urlopen.return_value.read.return_value = mocked_response
+        with self.assertRaises(ex.QuotaLimitError):
+            self.sc._send_request(
+                'METHOD',
+                'Test text.',
+                SpinChimp.DEFAULT_PARAMS_SPIN
+            )
+        mocked_response = 'failed:Credentials check result:DatabaseFailure'
+        urllib2.urlopen.return_value.read.return_value = mocked_response
+        with self.assertRaises(ex.InternalError):
+            self.sc._send_request(
+                'METHOD',
+                'Test text.',
+                SpinChimp.DEFAULT_PARAMS_SPIN
+            )
+        mocked_response = 'failed:There are no words in your article!'
+        urllib2.urlopen.return_value.read.return_value = mocked_response
+        with self.assertRaises(ex.ArticleError):
+            self.sc._send_request(
+                'METHOD',
+                'Test text.',
+                SpinChimp.DEFAULT_PARAMS_SPIN
+            )
+        mocked_response = 'failed:Cars are foo!'
+        urllib2.urlopen.return_value.read.return_value = mocked_response
+        with self.assertRaises(ex.UnknownError):
+            self.sc._send_request(
+                'METHOD',
+                'Test text.',
+                SpinChimp.DEFAULT_PARAMS_SPIN
+            )
