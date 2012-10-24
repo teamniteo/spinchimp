@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 import urllib
 import urllib2
 
@@ -265,9 +266,65 @@ class SpinChimp(object):
         result = response.read().decode("utf-8")
 
         if result.lower().startswith('failed:'):
-            self._raise_error(result[8:])
+            self._raise_error(result[7:])
 
         return result
 
-    def _raise_error(self, api_response):
-        raise ex.SpinChimpError(api_response)
+    def _raise_error(self, errormsg):
+        if (
+            re.search(r"Credentials check result:InvalidEmail",
+                      errormsg,
+                      re.IGNORECASE
+                      ) or
+            re.search(r"Credentials check result:SubscriptionExpired",
+                      errormsg,
+                      re.IGNORECASE
+                      ) or
+            re.search(r"Credentials check result:InvalidAPIKey",
+                      errormsg,
+                      re.IGNORECASE
+                      ) or
+            re.search(r"Credentials check result:NotAPIRegistered",
+                      errormsg,
+                      re.IGNORECASE
+                      ) or
+            re.search(r"No Email specified",
+                      errormsg,
+                      re.IGNORECASE
+                      ) or
+            re.search(r"No API Key specified",
+                      errormsg,
+                      re.IGNORECASE
+                      ) or
+            re.search(r"No Application ID (aid) Specified",
+                      errormsg,
+                      re.IGNORECASE
+                      )
+        ):
+            raise ex.AuthenticationError(errormsg)
+
+        elif (
+            re.search(r"Credentials check result:MaxQueriesReached",
+                      errormsg,
+                      re.IGNORECASE
+                      )):
+            raise ex.QuotaLimitError(errormsg)
+
+        elif (re.search(r"Credentials check result:DatabaseFailure",
+                        errormsg,
+                        re.IGNORECASE
+                        )):
+            raise ex.InternalError(errormsg)
+
+        elif (re.search(r"There are no words in your article!",
+                        errormsg,
+                        re.IGNORECASE
+                        ) or
+              re.search(r"Article too long (\d words). Max is \d.",
+                        errormsg,
+                        re.IGNORECASE
+                        )):
+            raise ex.ArticleError(errormsg)
+
+        else:
+            raise ex.UnknownError(errormsg)

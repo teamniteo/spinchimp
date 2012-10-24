@@ -43,3 +43,48 @@ class NetworkError(SpinChimpError):
 
     def __str__(self):
         return self.msg
+
+
+class AuthenticationError(SpinChimpError):
+    """Raised when authentication error occurs."""
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class QuotaLimitError(SpinChimpError):
+    """Raised when API quota limit is reached."""
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class InternalError(SpinChimpError):
+    """Raised when unexpected error occurs on the API server when processing a request."""
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class ArticleError(SpinChimpError):
+    """Raised when spinning article."""
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class UnknownError(SpinChimpError):
+    """Raised when API call results in an unrecognized error."""
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
