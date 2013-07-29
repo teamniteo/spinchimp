@@ -2,10 +2,10 @@ language: python
 python:
   - 2.7
 install:
-  - sudo apt-get purge python2.5
-  - python bootstrap.py
+  - python bootstrap.py --version 1.7.1
   - bin/buildout -q
 script:
+  - bin/test
   - bin/vvv setup.py
   - bin/vvv src/spinchimp
 
