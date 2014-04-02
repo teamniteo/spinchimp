@@ -4,7 +4,7 @@
 class SpinChimpError(Exception):
     """Base class for exceptions in Spin Chimp module."""
     def __init__(self, api_error_msg):
-        #api_error_msg respresents raw error string as returned by API server
+        # api_error_msg respresents raw error string as returned by API server
         super(SpinChimpError, self).__init__()
         self.api_errors = tuple(api_error_msg.split('|'))
 
